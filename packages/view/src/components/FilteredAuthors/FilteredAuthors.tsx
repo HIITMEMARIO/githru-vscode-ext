@@ -9,11 +9,13 @@ const FilteredAuthors = () => {
   const { selectedData } = useGlobalData();
   const authSrcMap = usePreLoadAuthorImg();
   const selectedClusters = getInitData(selectedData);
+  const filteredSelectedData = selectedClusters.reverse().slice(0, 9);
+  const selectedClustersLength = selectedClusters.slice(9);
 
   return (
     <div className="selected-container">
       {authSrcMap &&
-        selectedClusters.map((selectedCluster) => {
+        filteredSelectedData.reverse().map((selectedCluster) => {
           return selectedCluster.summary.authorNames.map((authorArray: string[]) => {
             return authorArray.map((authorName: string) => (
               <Author
@@ -24,6 +26,9 @@ const FilteredAuthors = () => {
             ));
           });
         })}
+      <div className="selected-length">
+        {selectedClusters.length > 9 ? `+ ${selectedClustersLength.length} more` : null}
+      </div>
     </div>
   );
 };
