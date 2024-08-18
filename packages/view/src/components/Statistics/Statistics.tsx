@@ -1,4 +1,5 @@
 import { AuthorBarChart } from "./AuthorBarChart";
+import { CommitConventionChart } from "./CommitConventionChart";
 import { FileIcicleSummary } from "./FileIcicleSummary";
 import "./Statistics.scss";
 
@@ -7,6 +8,7 @@ const Statistics = () => {
     <div className="statistics">
       <AuthorBarChart />
       <FileIcicleSummary />
+      <CommitConventionChart />
     </div>
   );
 };
