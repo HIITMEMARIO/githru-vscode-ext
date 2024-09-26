@@ -18,6 +18,7 @@ const AuthorBarChart = () => {
   const { data: totalData, filteredData, setSelectedData, setFilteredData } = useGlobalData();
 
   const rawData = useGetSelectedData();
+  console.log(rawData);
   const svgRef = useRef<SVGSVGElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 

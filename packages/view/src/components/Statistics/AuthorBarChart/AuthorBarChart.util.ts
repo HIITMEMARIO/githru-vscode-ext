@@ -12,11 +12,13 @@ export const getDataByAuthor = (data: ClusterNode[]): AuthorDataType[] => {
   data.forEach(({ commitNodeList }) => {
     commitNodeList.forEach(({ commit }) => {
       const author = commit.author.names[0];
+      const commitType = commit.message;
       const { insertions, deletions } = commit.diffStatistics;
 
       if (!authorDataObj[author]) {
         authorDataObj[author] = {
           name: author,
+          commitType: commitType,
           commit: 1,
           insertion: insertions,
           deletion: deletions,
