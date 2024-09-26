@@ -24,6 +24,7 @@ const AuthorBarChart = () => {
   );
 
   const rawData = useGetSelectedData();
+  console.log(rawData);
   const svgRef = useRef<SVGSVGElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 

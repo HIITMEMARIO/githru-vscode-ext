@@ -3,6 +3,7 @@ import type { METRIC_TYPE } from "./AuthorBarChart.const";
 export type AuthorDataType = {
   name: string;
   commit: number;
+  commitType?: string;
   insertion: number;
   deletion: number;
   names?: string[];
@@ -14,6 +15,7 @@ export type AuthorDataObj = {
   [key: string]: {
     name: string;
     commit: number;
+    commitType: string;
     insertion: number;
     deletion: number;
   };
