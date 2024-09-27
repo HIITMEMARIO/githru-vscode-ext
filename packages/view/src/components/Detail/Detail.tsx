@@ -18,6 +18,7 @@ import { FIRST_SHOW_NUM } from "./Detail.const";
 import type { DetailProps, DetailSummaryProps, DetailSummaryItem } from "./Detail.type";
 
 import "./Detail.scss";
+import { Tooltip } from "@mui/material";
 
 const DetailSummary = ({ commitNodeListInCluster }: DetailSummaryProps) => {
   const { authorLength, fileLength, commitLength, insertions, deletions } = getCommitListDetail({
@@ -84,7 +85,7 @@ const Detail = ({ selectedData, clusterId, authSrcMap }: DetailProps) => {
                     <span className="message">{message}</span>
                   </div>
                 </div>
-                <span className="author-date">
+                <span className="commit-date">
                   {author.names[0]}, {dayjs(commitDate).format("YY. M. DD. a h:mm")}
                 </span>
               </div>
@@ -95,8 +96,12 @@ const Detail = ({ selectedData, clusterId, authSrcMap }: DetailProps) => {
                   tabIndex={0}
                   onKeyDown={handleCommitIdCopy(id)}
                 >
-                  {id.slice(0, 6)}
-                  <span className="commit-id__tooltip">{id}</span>
+                  <Tooltip
+                    placement="right"
+                    title={id}
+                  >
+                    <p>{`${id.slice(0, 6)}...`}</p>
+                  </Tooltip>
                 </a>
               </div>
             </li>
