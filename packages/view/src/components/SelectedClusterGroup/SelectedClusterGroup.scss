@@ -17,29 +17,11 @@
     cursor: pointer;
   }
 
-  &__list {
-    position: absolute;
-    top: 2rem;
-    right: -0.625rem;
-    max-height: 15rem;
-    overflow-y: auto;
-    padding: 0.3125rem;
-    background-color: $color-dark-gray;
-    border-radius: 0.5rem;
-    box-shadow: 0rem 0rem 0.625rem $color-background;
-    z-index: 10;
-
-    &::-webkit-scrollbar {
-      width: 0;
-    }
-
-    .selected-clusters__item {
-      width: 12.5rem;
-      text-overflow: ellipsis;
-      justify-content: space-between;
-      margin: 0.3125rem;
-      color: $color-white;
-      background-color: #4f5662;
-    }
+  & .MuiChip-root {
+    width: 200px;
+    text-overflow: ellipsis;
+    justify-content: space-between;
+    margin: 5px;
+    background-color: $color-light-gray;
   }
 }
