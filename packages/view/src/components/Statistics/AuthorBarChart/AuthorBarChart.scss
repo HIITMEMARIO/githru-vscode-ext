@@ -5,95 +5,95 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-}
 
-&__title {
-  font-size: $font-size-title;
-  font-weight: $font-weight-semibold;
-}
+  &__title {
+    font-size: $font-size-title;
+    font-weight: $font-weight-semibold;
+  }
 
-&__header {
-  width: 100%;
-  text-align: right;
-}
+  &__header {
+    width: 100%;
+    text-align: right;
+  }
 
-& &__select-box {
-  border: 0.0625rem solid $color-white;
-  color: $color-white;
-  height: 1.5625rem;
-  width: 6.25rem;
-  font-size: $font-size-caption;
-
-  & .MuiSvgIcon-root {
+  & &__select-box {
+    border: 0.0625rem solid $color-white;
     color: $color-white;
-  }
+    height: 1.5625rem;
+    width: 6.25rem;
+    font-size: $font-size-caption;
 
-  &.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border: none;
-  }
-}
-
-&__chart {
-  overflow: visible;
-  margin: 1.25rem 2.5rem 2.5rem;
-}
-
-&__axis {
-  color: $color-white;
-
-  &.x-axis {
-    .tick {
-      display: none;
+    & .MuiSvgIcon-root {
+      color: $color-white;
     }
 
-    .x-axis__label {
-      fill: $color-white;
+    &.Mui-focused .MuiOutlinedInput-notchedOutline {
+      border: none;
     }
   }
-}
 
-&__container {
-  cursor: pointer;
+  &__chart {
+    overflow: visible;
+    margin: 1.25rem 2.5rem 2.5rem;
+  }
 
-  .author-bar-chart__bar {
-    &:hover {
-      rect {
-        fill: var(--color-tertiary);
+  &__axis {
+    color: $color-white;
+
+    &.x-axis {
+      .tick {
+        display: none;
+      }
+
+      .x-axis__label {
+        fill: $color-white;
       }
     }
+  }
 
-    rect {
-      fill: var(--color-secondary);
+  &__container {
+    cursor: pointer;
+
+    .author-bar-chart__bar {
+      &:hover {
+        rect {
+          fill: var(--color-tertiary);
+        }
+      }
+
+      rect {
+        fill: var(--color-secondary);
+      }
+
+      .author-bar-chart__name {
+        fill: $color-white;
+        stroke: none;
+        font-size: $font-size-caption;
+        text-anchor: start;
+        font-weight: $font-weight-semibold;
+      }
     }
+  }
+
+  &__tooltip {
+    display: none;
+    position: absolute;
+    padding: 0.5rem 1rem;
+    border-radius: 0.3125rem;
+    font-size: $font-size-caption;
+    text-align: center;
+    line-height: 1.5;
+    background-color: rgba($color-dark-gray, 0.9);
+    color: $color-white;
+    pointer-events: none;
 
     .author-bar-chart__name {
-      fill: $color-white;
-      stroke: none;
-      font-size: $font-size-caption;
-      text-anchor: start;
       font-weight: $font-weight-semibold;
     }
-  }
-}
 
-&__tooltip {
-  display: none;
-  position: absolute;
-  padding: 0.5rem 1rem;
-  border-radius: 0.3125rem;
-  font-size: $font-size-caption;
-  text-align: center;
-  line-height: 1.5;
-  background-color: rgba($color-dark-gray, 0.9);
-  color: $color-white;
-  pointer-events: none;
-
-  .author-bar-chart__name {
-    font-weight: $font-weight-semibold;
-  }
-
-  .author-bar-chart__count {
-    font-weight: $font-weight-semibold;
-    color: var(--color-primary);
+    .author-bar-chart__count {
+      font-weight: $font-weight-semibold;
+      color: var(--color-primary);
+    }
   }
 }
