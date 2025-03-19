@@ -1,30 +1,20 @@
 import { useState } from "react";
-import type { MouseEvent } from "react";
-import Button from "@mui/material/Button";
-import Menu from "@mui/material/Menu";
+import { useShallow } from "zustand/react/shallow";
 import Chip from "@mui/material/Chip";
 import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
 
 import { selectedDataUpdater } from "components/VerticalClusterList/VerticalClusterList.util";
 import { getInitData, getClusterById } from "components/VerticalClusterList/Summary/Summary.util";
-import { useGlobalData } from "hooks";
-
 import "./SelectedClusterGroup.scss";
+import { useDataStore } from "store";
 
 const SelectedClusterGroup = () => {
-  const { selectedData, setSelectedData } = useGlobalData();
+  const [selectedData, setSelectedData] = useDataStore(
+    useShallow((state) => [state.selectedData, state.setSelectedData])
+  );
   const selectedClusters = getInitData(selectedData);
 
-  const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
-  const isOpen = Boolean(menuAnchorElement);
-
-  const openClusterGroup = (event: MouseEvent<HTMLButtonElement>) => {
-    setMenuAnchorElement(event.currentTarget);
-  };
-
-  const closeClusterGroup = () => {
-    setMenuAnchorElement(null);
-  };
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const deselectCluster = (clusterId: number) => () => {
     const selected = getClusterById(selectedData, clusterId);
@@ -33,38 +23,28 @@ const SelectedClusterGroup = () => {
 
   return (
     <div className="selected-clusters">
-      <Button
+      <button
+        type="button"
         className="selected-clusters__label"
-        id="cluster-group-button"
-        aria-controls={isOpen ? "cluster-group-box" : undefined}
-        aria-expanded={isOpen ? "true" : undefined}
-        aria-haspopup="true"
-        sx={{ color: "inherit", padding: 0, textTransform: "none" }}
-        onClick={openClusterGroup}
+        onClick={() => setIsOpen(!isOpen)}
       >
         Selected Nodes
         <ArrowDropDownRoundedIcon />
-      </Button>
-      <Menu
-        className="selected-clusters__dropdown"
-        id="cluster-group-box"
-        anchorEl={menuAnchorElement}
-        open={isOpen}
-        MenuListProps={{
-          "aria-labelledby": "cluster-group-button",
-        }}
-        onClose={closeClusterGroup}
-      >
-        {selectedClusters.map((selectedCluster) => (
-          <li key={selectedCluster.clusterId}>
-            <Chip
-              className="selected-clusters__item"
-              label={selectedCluster.summary.content.message}
-              onDelete={deselectCluster(selectedCluster.clusterId)}
-            />
-          </li>
-        ))}
-      </Menu>
+      </button>
+      {isOpen && (
+        <ul className="selected-clusters__list">
+          {selectedClusters.map((selectedCluster) => (
+            <li key={selectedCluster.clusterId}>
+              <Chip
+                className="selected-clusters__item"
+                title={selectedCluster.summary.content.message}
+                label={selectedCluster.summary.content.message}
+                onDelete={deselectCluster(selectedCluster.clusterId)}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

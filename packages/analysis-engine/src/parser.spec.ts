@@ -1,5 +1,5 @@
 import { getCommitMessageType } from "./commit.util";
-import getCommitRaws from "./parser"; 
+import getCommitRaws from "./parser";
 import type { CommitRaw, DifferenceStatistic } from "./types";
 
 describe("commit message type", () => {
@@ -34,117 +34,233 @@ describe("commit message type", () => {
   });
 });
 
-describe('getCommitRaws', () => {
-  const testCommitLines = [
-    "commit a b (HEAD)",
-    "commit a b (HEAD -> main, origin/main, origin/HEAD)",
-    "commit a b (HEAD, tag: v1.0.0)",
-    "commit a b (HEAD -> main, origin/main, origin/HEAD, tag: v2.0.0)",
-    "commit a b (HEAD, tag: v2.0.0, tag: v1.4)"
-  ];
+describe("getCommitRaws", () => {
+  const FRONT_NEW_LINE = "\n\n";
+  const INDENTATION = "    ";
 
-  const expectedBranches = [
-    ['HEAD'],
-    ['HEAD', 'main', 'origin/main', 'origin/HEAD'],
-    ['HEAD'],
-    ['HEAD', 'main', 'origin/main', 'origin/HEAD'],
-    ['HEAD']
-  ];
+  const fakeAuthor = "John Park\nmail@gmail.com\nSun Sep 4 20:17:59 2022 +0900";
+  const fakeCommitter = `John Park 2\nmail2@gmail.com\nSun Sep 5 20:17:59 2022 +0900`;
+  const fakeCommitMessage = `commit message\n${INDENTATION}`;
+  const fakeCommitMessageAndBody = `commit message title\n${INDENTATION}\n${INDENTATION}commit message body`;
+  const fakeCommitHash = "a\nb";
+  const fakeCommitRef = "HEAD";
+  const fakeCommitFileChange = "10\t0\ta.ts\n1\t0\tREADME.md";
 
-  const expectedTags = [
-    [],
-    [],
-    ['v1.0.0'],
-    ['v2.0.0'],
-    ['v2.0.0', 'v1.4']
-  ];
-
-  const testCommitFileChanges = [
-    "10\t0\ta.ts\n1\t0\tREADME.md",
-    "3\t3\ta.ts",
-    "4\t0\ta.ts",
-    "0\t6\ta.ts\n2\t0\tb.ts\n3\t3\tc.ts"
-  ];
-
-  const expectedFileChanged:DifferenceStatistic[] = [
-    {
-      totalInsertionCount: 11,
-      totalDeletionCount: 0,
-      fileDictionary: {
-        'a.ts': { insertionCount: 10, deletionCount: 0 },
-        'README.md': { insertionCount: 1, deletionCount: 0 },
-      }
-    },
-    {
-      totalInsertionCount: 3,
-      totalDeletionCount: 3,
-      fileDictionary: { 'a.ts': { insertionCount: 3, deletionCount: 3 } }
-    },
-    {
-      totalInsertionCount: 4,
-      totalDeletionCount: 0,
-      fileDictionary: { 'a.ts': { insertionCount: 4, deletionCount: 0 } }
-    },
-    {
-      totalInsertionCount: 5,
-      totalDeletionCount: 9,
-      fileDictionary: {
-        'a.ts': { insertionCount: 0, deletionCount: 6 },
-        'b.ts': { insertionCount: 2, deletionCount: 0 },
-        'c.ts': { insertionCount: 3, deletionCount: 3 },
-      }
-    }
-  ];
-
-  const commonExpectatedResult: CommitRaw={
+  const commonExpectatedResult: CommitRaw = {
     sequence: 0,
-    id: 'a',
-    parents: ['b'],
-    branches: ['HEAD'],
+    id: "a",
+    parents: ["b"],
+    branches: ["HEAD"],
     tags: [],
-    author: { name: 'John Park', email: 'mail@gmail.com' },
-    authorDate: new Date('Sun Sep 4 20:17:59 2022 +0900'),
-    committer: { name: 'John Park', email: 'mail@gmail.com' },
-    committerDate: new Date('Sun Sep 4 20:17:59 2022 +0900'),
-    message: 'commit message',
+    author: { name: "John Park", email: "mail@gmail.com" },
+    authorDate: new Date("Sun Sep 4 20:17:59 2022 +0900"),
+    committer: { name: "John Park 2", email: "mail2@gmail.com" },
+    committerDate: new Date("Sun Sep 5 20:17:59 2022 +0900"),
+    message: "commit message",
     differenceStatistic: {
       totalInsertionCount: 0,
       totalDeletionCount: 0,
       fileDictionary: {},
     },
-    commitMessageType: ""
+    commitMessageType: "",
+  };
+  const expectedCommitMessageBody = "commit message title\n\ncommit message body";
+  const expectedFileChange: DifferenceStatistic = {
+    totalInsertionCount: 11,
+    totalDeletionCount: 0,
+    fileDictionary: {
+      "a.ts": { insertionCount: 10, deletionCount: 0 },
+      "README.md": { insertionCount: 1, deletionCount: 0 },
+    },
   };
 
-  testCommitLines.forEach((mockLog, index) => {
-    it(`should parse gitlog to commitRaw(branch, tag)`, () => {
-      const mock = `${mockLog}
-Author: John Park <mail@gmail.com>
-AuthorDate: Sun Sep 4 20:17:59 2022 +0900
-Commit: John Park <mail@gmail.com>
-CommitDate: Sun Sep 4 20:17:59 2022 +0900
-\n\tcommit message
-`;
-      const result = getCommitRaws(mock);
-      const expectedResult = { ...commonExpectatedResult, branches: expectedBranches[index], tags: expectedTags[index] };
-      
-      expect(result).toEqual([expectedResult]);
-    });
+  it.each([
+    [
+      `${FRONT_NEW_LINE}${"a\n"}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        id: "a",
+        parents: [],
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${"c\nd"}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        id: "c",
+        parents: ["d"],
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${"d\ne f"}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        id: "d",
+        parents: ["e", "f"],
+      },
+    ],
+  ])("should parse gitlog to commitRaw(hash)", (mockLog, expectedResult) => {
+    const result = getCommitRaws(mockLog);
+    expect(result).toEqual([expectedResult]);
   });
 
-  testCommitFileChanges.forEach((mockLog, index) => {
-    it(`should parse gitlog to commitRaw(file changed)`, () => {
-      const mock = `commit a b (HEAD)
-Author: John Park <mail@gmail.com>
-AuthorDate: Sun Sep 4 20:17:59 2022 +0900
-Commit: John Park <mail@gmail.com>
-CommitDate: Sun Sep 4 20:17:59 2022 +0900
-\n\tcommit message
-\n${mockLog}
-`;
-      const result = getCommitRaws(mock);
-      const expectedResult = { ...commonExpectatedResult, differenceStatistic: expectedFileChanged[index] };
+  it.each([
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${"HEAD"}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        branches: ["HEAD"],
+        tags: [],
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${"HEAD -> main, origin/main, origin/HEAD"}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        branches: ["HEAD", "main", "origin/main", "origin/HEAD"],
+        tags: [],
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${"HEAD, tag: v1.0.0"}\n${fakeAuthor}\n${fakeCommitter}$\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        branches: ["HEAD"],
+        tags: ["v1.0.0"],
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${"HEAD -> main, origin/main, origin/HEAD, tag: v2.0.0"}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        branches: ["HEAD", "main", "origin/main", "origin/HEAD"],
+        tags: ["v2.0.0"],
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${"HEAD, tag: v2.0.0, tag: v1.4"}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        branches: ["HEAD"],
+        tags: ["v2.0.0", "v1.4"],
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${""}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`,
+      {
+        ...commonExpectatedResult,
+        branches: [],
+        tags: [],
+      },
+    ],
+  ])("should parse gitlog to commitRaw(branch, tag)", (mockLog, expectedResult) => {
+    const result = getCommitRaws(mockLog);
+    expect(result).toEqual([expectedResult]);
+  });
 
-      expect(result).toEqual([expectedResult]);
-    });
+  it.each([
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}\n${"10\t0\ta.ts\n1\t0\tREADME.md"}`,
+      {
+        ...commonExpectatedResult,
+        differenceStatistic: {
+          totalInsertionCount: 11,
+          totalDeletionCount: 0,
+          fileDictionary: {
+            "a.ts": { insertionCount: 10, deletionCount: 0 },
+            "README.md": { insertionCount: 1, deletionCount: 0 },
+          },
+        },
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}\n${"3\t3\ta.ts"}`,
+      {
+        ...commonExpectatedResult,
+        differenceStatistic: {
+          totalInsertionCount: 3,
+          totalDeletionCount: 3,
+          fileDictionary: { "a.ts": { insertionCount: 3, deletionCount: 3 } },
+        },
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}\n${"4\t0\ta.ts"}`,
+      {
+        ...commonExpectatedResult,
+        differenceStatistic: {
+          totalInsertionCount: 4,
+          totalDeletionCount: 0,
+          fileDictionary: { "a.ts": { insertionCount: 4, deletionCount: 0 } },
+        },
+      },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}\n${"0\t6\ta.ts\n2\t0\tb.ts\n3\t3\tc.ts"}`,
+      {
+        ...commonExpectatedResult,
+        differenceStatistic: {
+          totalInsertionCount: 5,
+          totalDeletionCount: 9,
+          fileDictionary: {
+            "a.ts": { insertionCount: 0, deletionCount: 6 },
+            "b.ts": { insertionCount: 2, deletionCount: 0 },
+            "c.ts": { insertionCount: 3, deletionCount: 3 },
+          },
+        },
+      },
+    ],
+  ])("should parse gitlog to commitRaw(file changed)", (mockLog, expectedResult) => {
+    const result = getCommitRaws(mockLog);
+    expect(result).toEqual([expectedResult]);
+  });
+
+  it(`should parse gitlog to commitRaw(multiple commits)`, () => {
+    const mockLog = `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}\n${fakeCommitFileChange}\n\n\n\n${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessage}`;
+    const result = getCommitRaws(mockLog);
+    const expectedResult = [
+      { ...commonExpectatedResult, differenceStatistic: expectedFileChange },
+      { ...commonExpectatedResult, sequence: 1 },
+    ];
+
+    expect(result).toEqual(expectedResult);
+  });
+
+  it.each([
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${"commit message title"}\n${INDENTATION}`,
+      { ...commonExpectatedResult, message: "commit message title" },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${"commit message title"}\n${INDENTATION}${"commit message body"}`,
+      { ...commonExpectatedResult, message: "commit message title\ncommit message body" },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${"commit message title"}\n${INDENTATION}\n${INDENTATION}${"commit message body"}`,
+      { ...commonExpectatedResult, message: "commit message title\n\ncommit message body" },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${"commit message title"}\n${INDENTATION}\n${INDENTATION}\n${INDENTATION}${"commit message body"}`,
+      { ...commonExpectatedResult, message: "commit message title\n\n\ncommit message body" },
+    ],
+    [
+      `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n\n${INDENTATION}`,
+      { ...commonExpectatedResult, message: "" },
+    ],
+  ])("should parse gitlog to commitRaw(commit message)", (mockLog, expectedResult) => {
+    const result = getCommitRaws(mockLog);
+    expect(result).toEqual([expectedResult]);
+  });
+
+  it(`should parse gitlog to commitRaw(commit message body and file change)`, () => {
+    const mockLog = `${FRONT_NEW_LINE}${fakeCommitHash}\n${fakeCommitRef}\n${fakeAuthor}\n${fakeCommitter}\n${fakeCommitMessageAndBody}\n${fakeCommitFileChange}`;
+    const result = getCommitRaws(mockLog);
+    const expectedResult = {
+      ...commonExpectatedResult,
+      message: expectedCommitMessageBody,
+      differenceStatistic: expectedFileChange,
+    };
+
+    expect(result).toEqual([expectedResult]);
   });
 });

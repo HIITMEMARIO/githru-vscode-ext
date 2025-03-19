@@ -1,12 +1,14 @@
 import type { MouseEvent } from "react";
 import { useRef, useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import * as d3 from "d3";
 import type { SelectChangeEvent } from "@mui/material";
 import { FormControl, MenuItem, Select } from "@mui/material";
 
+import { useDataStore } from "store";
 import type { ClusterNode, AuthorInfo } from "types";
-import { useGlobalData } from "hooks";
 import { getAuthorProfileImgSrc } from "utils/author";
+import { pxToRem } from "utils/pxToRem";
 
 import { useGetSelectedData } from "../Statistics.hook";
 
@@ -17,7 +19,9 @@ import { DIMENSIONS, METRIC_TYPE } from "./AuthorBarChart.const";
 import "./AuthorBarChart.scss";
 
 const AuthorBarChart = () => {
-  const { data: totalData, filteredData, setSelectedData, setFilteredData } = useGlobalData();
+  const [totalData, filteredData, setSelectedData, setFilteredData] = useDataStore(
+    useShallow((state) => [state.data, state.filteredData, state.setSelectedData, state.setFilteredData])
+  );
 
   const rawData = useGetSelectedData();
   const svgRef = useRef<SVGSVGElement>(null);
@@ -60,7 +64,7 @@ const AuthorBarChart = () => {
     const xAxisGroup = svg
       .append("g")
       .attr("class", "author-bar-chart__axis x-axis")
-      .style("transform", `translateY(${DIMENSIONS.height}px)`);
+      .style("transform", `translateY(${pxToRem(DIMENSIONS.height)})`);
     const yAxisGroup = svg.append("g").attr("class", "author-bar-chart__axis y-axis");
     const barGroup = svg.append("g").attr("class", "author-bar-chart__container");
 
@@ -88,15 +92,15 @@ const AuthorBarChart = () => {
     xAxisGroup
       .append("text")
       .attr("class", "x-axis__label")
-      .style("transform", `translate(${DIMENSIONS.width / 2}px, ${DIMENSIONS.margins - 10}px)`)
+      .style("transform", `translate(${pxToRem(DIMENSIONS.width / 2)}, ${pxToRem(DIMENSIONS.margins - 10)})`)
       .text(`${metric} # / Total ${metric} # (%)`);
 
     // Event handler
     const handleMouseOver = (e: MouseEvent<SVGRectElement | SVGTextElement>, d: AuthorDataType) => {
       tooltip
         .style("display", "inline-block")
-        .style("left", `${e.pageX - 70}px`)
-        .style("top", `${e.pageY - 120}px`)
+        .style("left", pxToRem(e.pageX - 70))
+        .style("top", pxToRem(e.pageY - 120))
         .html(
           `
           <p class="author-bar-chart__name">${d.name}</p>
@@ -112,7 +116,7 @@ const AuthorBarChart = () => {
     };
 
     const handleMouseMove = (e: MouseEvent<SVGRectElement | SVGTextElement>) => {
-      tooltip.style("left", `${e.pageX - 70}px`).style("top", `${e.pageY - 120}px`);
+      tooltip.style("left", pxToRem(e.pageX - 70)).style("top", pxToRem(e.pageY - 120));
     };
     const handleMouseOut = () => {
       tooltip.style("display", "none");
@@ -231,11 +235,11 @@ const AuthorBarChart = () => {
             MenuProps={{
               PaperProps: {
                 sx: {
-                  marginTop: "1px",
+                  marginTop: "0.0625rem",
                   backgroundColor: "#212121",
                   color: "white",
                   "& .MuiMenuItem-root": {
-                    fontSize: "12px",
+                    fontSize: "0.75rem",
                     backgroundColor: "#212121 !important ",
                     "&:hover": {
                       backgroundColor: "#333333 !important",
