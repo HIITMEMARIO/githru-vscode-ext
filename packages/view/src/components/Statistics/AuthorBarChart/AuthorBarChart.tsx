@@ -221,11 +221,7 @@ const AuthorBarChart = () => {
   };
 
   return (
-<<<<<<< HEAD
     <div className="author-bar-chart">
-=======
-    <div className="author-bar-chart__container">
->>>>>>> 5e5f440 (feat:수정중)
       <p className="author-bar-chart__title">Author Bar Chart</p>
       <div className="author-bar-chart__header">
         <FormControl
