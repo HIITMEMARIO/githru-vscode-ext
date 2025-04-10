@@ -48,7 +48,7 @@
     "@babel/preset-typescript": "^7.22.15",
     "@babel/runtime": "^7.18.9",
     "@playwright/test": "^1.37.0",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.16",
     "@svgr/webpack": "^8.0.1",
     "@trysound/sax": "^0.2.0",
     "@types/d3": "^7.4.0",

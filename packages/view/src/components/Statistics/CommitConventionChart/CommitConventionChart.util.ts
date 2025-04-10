@@ -39,6 +39,16 @@ export const filterCommitsByConvention = (rawData: ClusterNode[]) => {
   return categorizedFiles;
 };
 
+export const convertToHierarchy = (data: Record<string, string[]>) => {
+  return {
+    name: "Commits",
+    children: Object.entries(data).map(([key, files]) => ({
+      name: key,
+      children: files.map((file) => ({ name: file })),
+    })),
+  };
+};
+
 // export const filteredConventions = (useData) =>{
 
 // }
